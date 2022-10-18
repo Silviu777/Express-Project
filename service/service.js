@@ -88,7 +88,7 @@ async function deleteArticle(request, response) {
 
             if (article) {
                 await article.destroy();
-                response.send(`Article with id ${request.params.id} has been removed`);
+                response.send(`Article with id ${request.params.id} has been removed!`);
             }
         }
         else {
