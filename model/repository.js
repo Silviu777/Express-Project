@@ -18,7 +18,8 @@ const Article = sequelize.define('article', {
 
     article_no: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
+        unique: true
     },
 
     article_short_description: {
@@ -62,6 +63,33 @@ const Article = sequelize.define('article', {
     }
 });
 
+const Category = sequelize.define('category', {
+    id: {
+        type: Sequelize.INTEGER,
+        primaryKey: true,
+        autoIncrement: true,
+        allowNull: false,
+    },
+
+    category_name: {
+        type: Sequelize.STRING
+    }
+});
+
+const Token = sequelize.define('token', {
+    id: {
+        type: Sequelize.INTEGER,
+        primaryKey: true,
+        autoIncrement: true,
+        allowNull: false,
+    },
+
+    token_body: {
+        type: Sequelize.STRING,
+        allowNull: false
+    }
+});
+
 sequelize.sync();
 
 async function init() {
@@ -69,4 +97,10 @@ async function init() {
     await sequelize.sync({ alter: true });
 }
 
-export { Article, init }
+Article.belongsTo(Category, { foreignKey: 'category_id' })
+Category.hasMany(Article, { foreignKey: 'category_id' })
+
+Article.belongsTo(Token, { foreignKey: 'token_id' })
+Token.hasMany(Article, { foreignKey: 'token_id' })
+
+export { Article, Category, Token, init }
