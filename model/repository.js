@@ -60,7 +60,10 @@ const Article = sequelize.define('article', {
 
     article_citations: {
         type: Sequelize.STRING
-    }
+    },
+    token_id: {
+        type: Sequelize.INTEGER
+    },
 });
 
 const Category = sequelize.define('category', {
@@ -90,6 +93,18 @@ const Token = sequelize.define('token', {
     }
 });
 
+const Article_Token = sequelize.define('Article_Token', {
+    articleId: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+    },
+
+    tokenId: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+    },
+});
+
 sequelize.sync();
 
 async function init() {
@@ -100,7 +115,10 @@ async function init() {
 Article.belongsTo(Category, { foreignKey: 'category_id' })
 Category.hasMany(Article, { foreignKey: 'category_id' })
 
-Article.belongsTo(Token, { foreignKey: 'token_id' })
-Token.hasMany(Article, { foreignKey: 'token_id' })
+// Article.belongsTo(Token, { foreignKey: 'token_id' })
+// Token.hasMany(Article, { foreignKey: 'token_id' })
 
-export { Article, Category, Token, init }
+Token.belongsToMany(Article, { through: 'Article_Token' })
+Article.belongsToMany(Token, { through: 'Article_Token' })
+
+export { Article, Category, Token, Article_Token, init }

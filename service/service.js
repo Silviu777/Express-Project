@@ -1,11 +1,12 @@
-import { Article, Category, Token } from "../model/repository.js";
+import { Article, Article_Token, Category, Token } from "../model/repository.js";
 
 async function getArticles(request, response) {
     try {
         const articles = await Article.findAll({
+            attributes: { exclude: ['token_id'] },
             include: [
                 {
-                    model: Category,
+                    model: Token,
                     attributes: { exclude: ['id'] }
 
                 }]
@@ -26,7 +27,13 @@ async function getArticles(request, response) {
 async function getArticle(request, response) {
     try {
         if (request.params.id) {
-            const article = await Article.findByPk(request.params.id);
+            const article = await Article.findByPk(request.params.id, {
+                include: [
+                    {
+                        model: Token,
+                        attributes: { exclude: ['id'] }
+                    }]
+            });
 
             if (article) {
                 response.json(article);
@@ -55,6 +62,8 @@ async function addArticle(request, response) {
     try {
         if (request.body.article_no && existingArticle['count'] < 1) {
             await Article.create(request.body);
+            const article = await Article.findOne({ attributes: ['id'], where: { article_no: request.body.article_no } });
+            await Article_Token.create({ articleId: article.id, tokenId: request.body.token_id });
             response.status(201).send(`Article with title ${request.body.article_no} has been created!`);
         }
         else {
@@ -76,6 +85,7 @@ async function updateArticle(request, response) {
         if (article) {
             Object.entries(request.body).forEach(([body, value]) => article[body] = value); // actualizeaza continutul elementului de modificat
 
+            await Article_Token.create({ articleId: article.id, tokenId: request.body.token_id });
             await article.save();
             response.send(`Article with id ${request.params.id} has been updated!`);
         }
